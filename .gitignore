@@ -1,0 +1,26 @@
+# ---------- Ren'Py 编译产物与运行时 ----------
+*.rpyc
+*.rpymc
+*.rpyb
+game/saves/
+game/cache/
+log.txt
+errors.txt
+traceback.txt
+*.log
+
+# ---------- 密钥：绝对不要提交 ----------
+game/ai_config.json
+game/ai_web_config.json
+
+# ---------- 构建产物 ----------
+*-dists/
+old-mailbox-web/
+old-mailbox-web-dist/
+build/
+dist/
+
+# ---------- 系统 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
