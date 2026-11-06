@@ -2,8 +2,11 @@
 # '+' = progressive download, '-' = keep in game.zip (default)
 # See https://www.renpy.org/doc/html/build.html#classifying-and-ignoring-files for matching
 #
+# 本项目全部打进 game.zip：
+# 这样 Web 产物里不会出现独立的 game/ 目录，
+# 才能和源码目录共用同一个仓库根目录发布到 GitHub Pages。
 # +/- type path
 - image game/gui/**
-+ image game/**
-+ music game/audio/**
-+ voice game/voice/**
+- image game/**
+- music game/audio/**
+- voice game/voice/**
