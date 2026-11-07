@@ -133,6 +133,40 @@
       cursor: pointer;
     }
 
+    /* 手机竖屏提示：建议横屏 + 全屏按钮 */
+    #rotateHint {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px 14px;
+      background: rgba(9, 13, 19, 0.92);
+      border-top: 1px solid rgba(230, 185, 138, 0.35);
+      color: #e6c9a8;
+      font-size: 13px;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+      z-index: 99998;
+    }
+
+    #rotateHint button {
+      margin-left: 10px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(230, 185, 138, 0.55);
+      background: transparent;
+      color: #f2d6b0;
+      font-size: 13px;
+    }
+
+    @media (orientation: portrait) and (max-width: 900px) {
+      #rotateHint {
+        display: flex;
+      }
+    }
+
     #inputPrompt {
       color: #eee;
       font-size: 150%;
@@ -254,7 +288,21 @@
     </form>
   </div>
 
+  <div id="rotateHint">
+    <span>建议横屏游玩，画面更大</span>
+    <button onclick="omlFullscreen()">全屏</button>
+  </div>
+
   <script>
+      function omlFullscreen() {
+          var el = document.documentElement;
+          if (el.requestFullscreen) {
+              el.requestFullscreen();
+          } else if (el.webkitRequestFullscreen) {
+              el.webkitRequestFullscreen();
+          }
+      }
+
       // The URL to game.zip, relative to the URL of this file.
       window.gameZipURL = 'game.zip';
 
