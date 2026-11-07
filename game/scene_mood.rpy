@@ -243,7 +243,7 @@ init -6 python:
 # ---------------- 立绘尺寸 ----------------
 init -1 python:
     # 立绘统一按 2:3 出图（推荐 1024x1536），这里缩到屏幕内的高度
-    SPRITE_W, SPRITE_H = 480, 660
+    SPRITE_W, SPRITE_H = 400, 560
 
     def awan_sprite(state, fallback_color, label, alpha=1.0):
         """有正式立绘就用 images/awan/awan_<state>.png，否则用占位色块。
