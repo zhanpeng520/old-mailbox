@@ -119,6 +119,20 @@
       padding-right: 20px;
     }
 
+    #loadHint {
+      display: none;
+      margin-top: 10px;
+      color: #e6b98a;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    #loadHint a {
+      color: #f7e3c8;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
     #inputPrompt {
       color: #eee;
       font-size: 150%;
@@ -229,7 +243,9 @@
   <div id="statusDiv" class="hidden">
     <div id="statusTextDiv"></div>
     <progress id="statusProgress" value="0" max="100"></progress>
+    <div id="loadHint"></div>
   </div>
+
 
   <div id="inputDiv" class="hidden">
     <form id="inputForm">
@@ -248,6 +264,37 @@
               navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'all' });
           }
       }
+
+      // 加载看门狗：进度 20 秒没动就提示，避免手机上一直静静卡着
+      (function () {
+          var lastValue = -1;
+          var lastChange = Date.now();
+          var hint = document.getElementById('loadHint');
+          var statusDiv = document.getElementById('statusDiv');
+
+          setInterval(function () {
+              var loading = statusDiv && statusDiv.className.indexOf('hidden') === -1;
+              var bar = document.getElementById('statusProgress');
+              var v = bar ? parseFloat(bar.value || 0) : 0;
+
+              if (v !== lastValue) {
+                  lastValue = v;
+                  lastChange = Date.now();
+              }
+
+              if (!loading) {
+                  lastChange = Date.now();
+                  if (hint) hint.style.display = 'none';
+                  return;
+              }
+
+              if ((Date.now() - lastChange) / 1000 > 20 && hint && !hint.innerHTML) {
+                  hint.innerHTML = '网络似乎卡住了。首次进入要下载约 58MB（引擎 + 素材），建议先连 WiFi；' +
+                      '也可以 <a onclick="location.reload()">点这里重试</a>。';
+                  hint.style.display = 'block';
+              }
+          }, 1000);
+      })();
   </script>
   <script src="renpy-pre.js"></script>
   <script async type="text/javascript" src="renpy.js"></script>
