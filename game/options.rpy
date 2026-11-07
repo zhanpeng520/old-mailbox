@@ -66,7 +66,7 @@ define config.after_load_transition = None
 define config.end_game_transition = fade
 
 # 主菜单与游戏内音乐（素材缺失时留空即可）
-# define config.main_menu_music = "audio/main_theme.ogg"
+define config.main_menu_music = "audio/bgm_sea.ogg"
 
 # ---------- 打包 ----------
 init python:

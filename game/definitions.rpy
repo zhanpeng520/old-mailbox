@@ -12,7 +12,7 @@ define me = Character("我", color="#3f4a5a")
 # 女主：安舒瑶，平辈称呼「舒瑶」
 define awan = Character("舒瑶", color="#8a4b3f")
 define awan_low = Character("舒瑶", color="#7a4a40", what_prefix="……", what_suffix="")
-define letter = Character("信", color="#6b5a3a", what_italic=True)
+define letter = Character("信", color="#6b5a3a", what_italic=True, callback=letter_sound)
 
 # 路人（一次性角色，避免用字符串充当说话者）
 define boss = Character("老板娘", color="#55483c")
@@ -82,6 +82,11 @@ init -5 python:
             store.memory_piece += 1
             if store.memory_piece <= store.MEMORY_TOTAL:
                 renpy.notify("获得回忆碎片 %d / %d" % (store.memory_piece, store.MEMORY_TOTAL))
+                # 碎片入袋的清脆一声
+                try:
+                    play_sfx("sfx_memory")
+                except Exception:
+                    pass
         return True
 
     def add_affection(value):
@@ -101,6 +106,17 @@ init -5 python:
 
 # 有正式图就用 images/bg/<name>.png，没有自动退回纯色占位（逻辑见 scene_mood.rpy）
 image bg sea_dusk = bg_displayable("sea_dusk")
+# 同一段堤岸的时间变体（10 张），让海景不再一场到底
+image bg sea_dawn = bg_displayable("sea_dawn")
+image bg sea_morning = bg_displayable("sea_morning")
+image bg sea_noon = bg_displayable("sea_noon")
+image bg sea_overcast = bg_displayable("sea_overcast")
+image bg sea_rain = bg_displayable("sea_rain")
+image bg sea_storm = bg_displayable("sea_storm")
+image bg sea_afterrain = bg_displayable("sea_afterrain")
+image bg sea_sunset = bg_displayable("sea_sunset")
+image bg sea_night = bg_displayable("sea_night")
+image bg sea_moon = bg_displayable("sea_moon")
 image bg bus_window = bg_displayable("bus_window")
 image bg dessert_shop = bg_displayable("dessert_shop")
 image bg night_market = bg_displayable("night_market")
@@ -149,6 +165,19 @@ image awan fading = awan_sprite("fading", "#a9c2cf", "舒瑶 / 含泪透明", al
 image awan surprised = awan_sprite("surprised", "#f0c8b8", "舒瑶 / 惊讶")
 image awan smile = awan_sprite("smile", "#ecc4b4", "舒瑶 / 温柔")
 image awan cry = awan_sprite("cry", "#c9a7a7", "舒瑶 / 哭")
+
+# 扩充的 11 种表情（正式图在 images/awan/awan_<state>.webp）
+image awan sulk = awan_sprite("sulk", "#f2c3b6", "舒瑶 / 赌气")
+image awan angry = awan_sprite("angry", "#eeb4a8", "舒瑶 / 生气")
+image awan laugh = awan_sprite("laugh", "#f6cdb4", "舒瑶 / 笑出声")
+image awan blush = awan_sprite("blush", "#f4bcb4", "舒瑶 / 脸红")
+image awan think = awan_sprite("think", "#e8c6bb", "舒瑶 / 思索")
+image awan sigh = awan_sprite("sigh", "#dcc3bb", "舒瑶 / 无奈")
+image awan fear = awan_sprite("fear", "#d8c4c4", "舒瑶 / 慌张")
+image awan sleepy = awan_sprite("sleepy", "#e6c8b8", "舒瑶 / 困倦")
+image awan firm = awan_sprite("firm", "#e8c0b2", "舒瑶 / 坚定")
+image awan wry = awan_sprite("wry", "#dcc0b8", "舒瑶 / 苦笑")
+image awan tease = awan_sprite("tease", "#f2c6b8", "舒瑶 / 促狭")
 
 # ---------- 立绘位置 / 演出 ----------
 transform awan_center:

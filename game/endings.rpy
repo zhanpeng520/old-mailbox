@@ -37,7 +37,7 @@ label ending_male_death:
     $ persistent.new_game_plus = True
     $ persistent.cleared_ending = "male_death"
 
-    scene bg sea_dusk
+    scene bg sea_dawn
     with slow_scene
 
     "我没有再问。"
@@ -109,7 +109,7 @@ label ending_female_death:
     $ persistent.new_game_plus = True
     $ persistent.cleared_ending = "female_death"
 
-    scene bg sea_dusk
+    scene bg sea_overcast
     with slow_scene
 
     show awan fading at awan_center
@@ -189,7 +189,7 @@ label ending_apart:
     $ persistent.new_game_plus = True
     $ persistent.cleared_ending = "apart"
 
-    scene bg sea_dusk
+    scene bg sea_afterrain
     with slow_scene
 
     show awan fading at awan_center
@@ -334,7 +334,7 @@ label ending_true:
     $ persistent.new_game_plus = True
     $ persistent.cleared_ending = "true_end"
 
-    scene bg sea_dusk
+    scene bg sea_morning
     with slow_scene
 
     show awan fading at awan_center
@@ -434,6 +434,9 @@ label ending_true:
 
     "第三年春天，我们领了证。"
     "没有办酒，只请了镇上几个相熟的人。"
+
+    scene bg sea_dusk
+    with slow_scene
 
     "傍晚的时候，我们沿着堤岸走。"
     "海把天烧成橘色，和第一天一样的颜色。"

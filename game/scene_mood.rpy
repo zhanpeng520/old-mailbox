@@ -22,7 +22,9 @@ init -6 python:
 
     # ---------------- 表情 ----------------
     MOOD_STATES = ["calm", "shy", "happy", "lonely", "hurt", "fading",
-                   "surprised", "smile", "cry"]
+                   "surprised", "smile", "cry",
+                   "sulk", "angry", "laugh", "blush", "think", "sigh",
+                   "fear", "sleepy", "firm", "wry", "tease"]
 
     MOOD_LABELS = {
         "calm": "平静",
@@ -34,6 +36,17 @@ init -6 python:
         "surprised": "愣住",
         "smile": "温柔",
         "cry": "哭",
+        "sulk": "赌气",
+        "angry": "生气",
+        "laugh": "笑出声",
+        "blush": "脸红",
+        "think": "思索",
+        "sigh": "无奈",
+        "fear": "慌张",
+        "sleepy": "困倦",
+        "firm": "坚定",
+        "wry": "苦笑",
+        "tease": "促狭",
     }
 
     # 玩家说的话里出现这些词，就往某个情绪上加分
@@ -47,6 +60,15 @@ init -6 python:
         ("surprised", 3, ["其实我", "我要走", "我早知道", "秘密", "你猜", "我发现"]),
         ("cry", 3, ["不回来", "最后一天", "永远见不到", "别忘了我"]),
         ("smile", 2, ["等你", "记得", "一直在", "陪着你"]),
+        ("angry", 2, ["你怎么这样", "太过分", "说好", "明明答应"]),
+        ("sulk", 2, ["哼", "才不理你", "随便你", "不要了"]),
+        ("blush", 2, ["喜欢你", "牵你", "抱一下", "好看", "可爱"]),
+        ("laugh", 2, ["哈哈", "笑死", "好呆", "你真好玩"]),
+        ("sigh", 1, ["又来了", "算了", "没办法", "总之"]),
+        ("fear", 2, ["台风", "落水", "危险", "别过去", "快跑"]),
+        ("sleepy", 1, ["困", "好晚", "睡了", "明天再说"]),
+        ("firm", 2, ["我会回来", "一定", "相信我", "不会忘"]),
+        ("tease", 1, ["你猜", "才不告诉你", "看出来了"]),
     ]
 
     # 她的回复里出现这些词，也影响表情
@@ -124,6 +146,17 @@ init -6 python:
         ("mailbox", ["信箱", "邮筒", "寄信", "信封"]),
         ("room", ["房间", "屋里", "台灯", "泡面", "枕头", "窗台", "床"]),
         ("town_day", ["早市", "镇上", "街口", "巷子", "菜市场"]),
+        # 海景的时间变体：信号越具体越靠前，剩下的都归到黄昏
+        ("sea_dawn", ["天亮", "拂晓", "黎明", "日出", "天快亮"]),
+        ("sea_morning", ["上午", "早上", "清晨的海", "太阳刚出来"]),
+        ("sea_noon", ["正午", "中午", "大太阳", "晒得"]),
+        ("sea_storm", ["台风", "风暴", "巨浪", "风眼"]),
+        ("sea_rain", ["下雨", "雨幕", "淋雨", "雨还没停"]),
+        ("sea_afterrain", ["雨后", "彩虹", "放晴", "云隙"]),
+        ("sea_overcast", ["阴天", "乌云", "灰蒙蒙", "天阴"]),
+        ("sea_sunset", ["夕阳", "落日", "火烧云", "太阳往下掉"]),
+        ("sea_moon", ["月亮", "月夜", "月光", "满月"]),
+        ("sea_night", ["夜海", "海面很黑的夜", "堤岸上没有灯"]),
         ("sea_dusk", ["海边", "堤岸", "沙滩", "日落", "海风", "浪", "礁石"]),
     ]
 
@@ -131,6 +164,16 @@ init -6 python:
 
     BG_FALLBACK = {
         "sea_dusk": "#233246",
+        "sea_dawn": "#3a4252",
+        "sea_morning": "#3f5264",
+        "sea_noon": "#5a6a72",
+        "sea_overcast": "#3c4148",
+        "sea_rain": "#333b44",
+        "sea_storm": "#2b2a34",
+        "sea_afterrain": "#4a5560",
+        "sea_sunset": "#4a3428",
+        "sea_night": "#151d2c",
+        "sea_moon": "#1b2436",
         "bus_window": "#2a3448",
         "dessert_shop": "#3a2f2a",
         "night_market": "#2e2438",
@@ -161,6 +204,10 @@ init -6 python:
             store.chat_scene = found
         store.chat_scene_vote = ""
         store.chat_scene_vote_n = 0
+        try:
+            sync_chat_audio()
+        except Exception:
+            pass
 
     def note_chat_scene(text):
         """聊天里连续两轮提到同一个地点才切背景，避免一句话就闪。"""
@@ -178,6 +225,10 @@ init -6 python:
             store.chat_scene = cand
             store.chat_scene_vote = ""
             store.chat_scene_vote_n = 0
+            try:
+                sync_chat_audio()
+            except Exception:
+                pass
 
     def _cover_image(path):
         """等比放大后居中裁切，铺满屏幕，不变形。"""
@@ -206,10 +257,15 @@ init -6 python:
         return None
 
     def play_ending_music():
-        """片尾曲：把文件放进 game/audio/ 命名为 ending_music 即可生效。"""
-        track = find_audio("ending_music")
+        """片尾曲：优先用 audio/ending_music，没有就用内置的 bgm_ending。"""
+        track = find_audio("ending_music") or find_audio("bgm_ending")
         if track:
-            renpy.music.play(track, fadein=4.0, if_changed=True)
+            renpy.music.play(track, channel="music", fadein=4.0, fadeout=4.0,
+                             loop=True, if_changed=True)
+            try:
+                stop_amb(4.0)
+            except Exception:
+                pass
         return track
 
     def bg_displayable(name):

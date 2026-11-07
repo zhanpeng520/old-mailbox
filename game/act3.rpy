@@ -327,7 +327,7 @@ label act3_truth:
 
     "可我连她是谁都没问清，就先怀疑了她。"
 
-    scene bg sea_dusk
+    scene bg sea_dawn
     with slow_scene
 
     "天亮的时候，她出现了。"

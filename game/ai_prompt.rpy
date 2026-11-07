@@ -55,7 +55,10 @@ init -9 python:
 - 只输出舒瑶说的话，1~3 句，尽量不超过 60 字。
 - 用中文口语，符合 17 岁女孩，可以有情绪，但不要戏剧化。
 - 说完之后另起一行，写一个情绪标记，格式必须是 [mood:xxx]，xxx 从下面里选一个：
-  calm 平静 / shy 害羞 / happy 开心 / lonely 落寞 / hurt 委屈 / fading 含泪将散
+  calm 平静 / shy 害羞 / happy 开心 / lonely 落寞 / hurt 委屈 / fading 含泪将散 /
+  surprised 愣住 / smile 温柔 / cry 哭 / sulk 赌气 / angry 生气 / laugh 笑出声 /
+  blush 脸红 / think 思索 / sigh 无奈 / fear 慌张 / sleepy 困倦 / firm 坚定 /
+  wry 苦笑 / tease 促狭
   这一行不是台词，他永远看不到，不要解释、不要重复、不要写别的字。"""
 
     # 好感分档：数值、称呼、语气、主动性、距离、参考台词

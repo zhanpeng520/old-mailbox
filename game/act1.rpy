@@ -141,7 +141,7 @@ label side_beach_shells:
 label side_beach_rain:
     $ affection += 5
 
-    scene bg sea_dusk
+    scene bg sea_overcast
     with fade_scene
 
     "雨来得没道理。前一秒还是黄昏，下一秒就砸下来。"
@@ -155,7 +155,7 @@ label side_beach_rain:
     "屋檐很窄，雨顺着边沿连成一道线，把外面隔成另一个世界。"
     "檐下有一盏没人管的旧灯，光是暖的，把她的头发照成很浅的白。"
 
-    scene bg sea_dusk
+    scene bg sea_rain
     with dissolve
 
     show awan shy at awan_center
@@ -244,7 +244,7 @@ label act1_invite:
     "海把最后的光整片摊开，一直铺到我们脚边。"
     "她的影子比我的短一截，边上镶着一圈橘色。"
 
-    scene bg sea_dusk
+    scene bg sea_sunset
     with dissolve
 
     show awan calm at awan_center

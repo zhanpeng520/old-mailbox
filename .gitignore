@@ -24,3 +24,8 @@ dist/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ---------- AI ???????????? ----------
+art_concept/raw_*/
+art_concept/_*_sheet.jpg
+art_concept/_awan_all.jpg

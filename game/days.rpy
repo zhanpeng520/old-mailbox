@@ -44,7 +44,7 @@ label day2_end:
 
     "她说得很轻，像怕被司机听见。"
 
-    scene bg sea_dusk
+    scene bg sea_night
     with slow_scene
 
     "车到镇上的时候，已经过了十一点。"
@@ -353,7 +353,7 @@ label day4_end:
     $ current_day = 4
     $ stage_info = "第四天夜里，摩天轮之后"
 
-    scene bg sea_dusk
+    scene bg sea_night
     with slow_scene
 
     "回到镇上的时候，又是夜里。"
@@ -508,7 +508,7 @@ label day5_start:
 
     awan "就一会儿。"
 
-    scene bg sea_dusk
+    scene bg sea_storm
     with slow_scene
 
     "天是开的。"
@@ -520,7 +520,7 @@ label day5_start:
     "浪一层一层翻过来，像有人在底下抖一块很重的绸子，每一道浪脊都镶着金边。"
     "远处的防波堤只剩下一个黑影，还歪着。"
 
-    scene bg sea_dusk
+    scene bg sea_storm
     with dissolve
 
     show awan fading at awan_center
