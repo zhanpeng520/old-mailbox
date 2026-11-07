@@ -24,7 +24,10 @@ init -6 python:
     MOOD_STATES = ["calm", "shy", "happy", "lonely", "hurt", "fading",
                    "surprised", "smile", "cry",
                    "sulk", "angry", "laugh", "blush", "think", "sigh",
-                   "fear", "sleepy", "firm", "wry", "tease"]
+                   "fear", "sleepy", "firm", "wry", "tease",
+                   "wave", "giggle", "uneasy", "point", "cry_silent",
+                   "teary_smile", "shock", "pout", "doze", "shiver",
+                   "resolve", "farewell", "lean", "wind"]
 
     MOOD_LABELS = {
         "calm": "平静",
@@ -47,6 +50,20 @@ init -6 python:
         "firm": "坚定",
         "wry": "苦笑",
         "tease": "促狭",
+        "wave": "招手",
+        "giggle": "掩嘴笑",
+        "uneasy": "不安",
+        "point": "指点",
+        "cry_silent": "无声落泪",
+        "teary_smile": "含泪微笑",
+        "shock": "震惊",
+        "pout": "鼓脸",
+        "doze": "犯困",
+        "shiver": "发抖",
+        "resolve": "决意",
+        "farewell": "道别",
+        "lean": "凑近",
+        "wind": "风里",
     }
 
     # 玩家说的话里出现这些词，就往某个情绪上加分

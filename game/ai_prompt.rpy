@@ -58,7 +58,9 @@ init -9 python:
   calm 平静 / shy 害羞 / happy 开心 / lonely 落寞 / hurt 委屈 / fading 含泪将散 /
   surprised 愣住 / smile 温柔 / cry 哭 / sulk 赌气 / angry 生气 / laugh 笑出声 /
   blush 脸红 / think 思索 / sigh 无奈 / fear 慌张 / sleepy 困倦 / firm 坚定 /
-  wry 苦笑 / tease 促狭
+  wry 苦笑 / tease 促狭 / wave 招手 / giggle 掩嘴笑 / uneasy 不安 / point 指点 /
+  cry_silent 无声落泪 / teary_smile 含泪微笑 / shock 震惊 / pout 鼓脸 /
+  doze 犯困 / shiver 发抖 / resolve 决意 / farewell 道别 / lean 凑近 / wind 风里
   这一行不是台词，他永远看不到，不要解释、不要重复、不要写别的字。"""
 
     # 好感分档：数值、称呼、语气、主动性、距离、参考台词

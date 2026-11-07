@@ -69,7 +69,7 @@ label act2_start:
             $ add_affection(3)
             me "你想吃什么，自己点。"
 
-            show awan shy at awan_center
+            show awan point at awan_center
             with dissolve
 
             awan "我……不知道这些名字。"
@@ -153,7 +153,7 @@ label act2_night_market:
             $ add_affection(4)
             "十块钱五个圈。她套了三次，一个都没中。"
 
-            show awan hurt at awan_center
+            show awan blush at awan_center
             with dissolve
 
             awan "我是不是很笨。"
@@ -164,7 +164,7 @@ label act2_night_market:
 
             "第四次，圈歪歪扭扭地挂在了最边上那个白瓷猫的耳朵上。"
 
-            show awan happy at awan_center
+            show awan giggle at awan_center
             with dissolve
 
             awan "中了！"
@@ -232,7 +232,7 @@ label act2_after_market:
             $ raise_quarrel(1)
             me "舒瑶。"
 
-            show awan calm at awan_center
+            show awan uneasy at awan_center
             with dissolve
 
             awan "嗯？"
@@ -370,7 +370,7 @@ label act2_bookstore:
 
             me "和谁？"
 
-            show awan hurt at awan_center
+            show awan shiver at awan_center
             with dissolve
 
             awan "云砚。"
@@ -491,7 +491,7 @@ label act2_ferris_wheel:
 
     "落地的时候，她的手又恢复了血色。"
 
-    show awan happy at awan_center
+    show awan giggle at awan_center
     with dissolve
 
     awan "云砚，我饿了。"

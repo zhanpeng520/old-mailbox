@@ -49,7 +49,7 @@ label side_dessert_shop:
 
     "快打烊了，老板娘在擦桌子。"
 
-    show awan happy at awan_center
+    show awan blush at awan_center
     with dissolve
 
     awan "又是这里。"
@@ -72,7 +72,7 @@ label side_dessert_shop:
             $ add_affection(3)
             me "什么叫时间在动？"
 
-            show awan lonely at awan_center
+            show awan uneasy at awan_center
             with dissolve
 
             awan "就是……会往前走。"
@@ -209,7 +209,7 @@ label side_ferris_wheel:
 
     "摩天轮的灯一圈一圈地转，像一只巨大的、慢慢呼吸的东西。"
 
-    show awan calm at awan_center
+    show awan giggle at awan_center
     with dissolve
 
     awan "我不上去了。"
@@ -289,7 +289,7 @@ label side_riverside:
             $ add_affection(6)
             me "那我以后常陪你来。"
 
-            show awan shy at awan_center
+            show awan think at awan_center
             with dissolve
 
             awan "以后？"
@@ -341,7 +341,7 @@ label side_record_store:
 
     me "你不是说你不记得？"
 
-    show awan hurt at awan_center
+    show awan uneasy at awan_center
     with dissolve
 
     awan "不是记得。是……身体记得。"
@@ -402,7 +402,7 @@ label side_bus_stop:
 
     "站台的灯坏了一盏，明明灭灭。电子屏滚动着末班车的时间。"
 
-    show awan calm at awan_center
+    show awan giggle at awan_center
     with dissolve
 
     awan "云砚，你以前等过末班车吗？"

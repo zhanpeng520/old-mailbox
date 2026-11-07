@@ -23,7 +23,7 @@ label day2_end:
     "末班小巴上，人很少。"
     "她靠着窗，城市的灯一盏一盏往后退。"
 
-    show awan calm at awan_center
+    show awan doze at awan_center
     with dissolve
 
     awan "云砚。"
@@ -50,7 +50,7 @@ label day2_end:
     "车到镇上的时候，已经过了十一点。"
     "堤岸上没有灯，只有海的声音。"
 
-    show awan calm at awan_center
+    show awan lonely at awan_center
     with dissolve
 
     awan "送到这儿就行了。"
@@ -69,7 +69,7 @@ label day2_end:
 
     me "加上周末，一共七天。"
 
-    show awan shy at awan_center
+    show awan giggle at awan_center
     with dissolve
 
     awan "你不用上班吗？"
@@ -215,7 +215,7 @@ label day3_start:
 
     "她笑了一下。"
 
-    show awan calm at awan_center
+    show awan smile at awan_center
     with dissolve
 
     awan "云砚，你有没有想过，不回城里了。"
@@ -271,7 +271,7 @@ label day3_start:
 
             me "找到为止。"
 
-            show awan hurt at awan_center
+            show awan cry_silent at awan_center
             with dissolve
 
             awan "如果找不到呢。"
@@ -409,7 +409,7 @@ label day5_start:
 
     "她坐在窗边，看着外面的海。"
 
-    show awan calm at awan_center
+    show awan shock at awan_center
     with dissolve
 
     awan "今天的海，声音不一样。"
@@ -422,7 +422,7 @@ label day5_start:
 
     me "……别吓我。"
 
-    show awan shy at awan_center
+    show awan giggle at awan_center
     with dissolve
 
     awan "骗你的。"
@@ -456,7 +456,7 @@ label day5_start:
 
             me "冷就靠着我。"
 
-            show awan shy at awan_center
+            show awan shiver at awan_center
             with dissolve
 
             awan "……嗯。"
@@ -584,7 +584,7 @@ label day5_start:
 
     "她站在窗边，背对着我，看着海。"
 
-    show awan calm at awan_center
+    show awan doze at awan_center
     with dissolve
 
     me "怎么不睡。"

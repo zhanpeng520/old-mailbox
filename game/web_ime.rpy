@@ -20,11 +20,12 @@ init -5 python:
     el = document.createElement('textarea');
     el.id = id;
     el.setAttribute('autocomplete', 'off');
-    el.style.cssText = 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);'
-      + 'width:58%;max-width:640px;height:54px;padding:12px 16px;border-radius:14px;'
-      + 'border:1px solid rgba(255,255,255,.3);background:rgba(9,13,19,.94);'
+    el.style.cssText = 'position:fixed;left:50%;bottom:6.2%;transform:translateX(-50%);'
+      + 'width:46%;max-width:600px;height:52px;padding:10px 16px;border-radius:12px;'
+      + 'border:1px solid rgba(230,185,138,.5);background:#121820;'
       + 'color:#f2efe9;font-size:17px;font-family:inherit;line-height:1.4;'
-      + 'resize:none;z-index:99999;box-shadow:0 10px 34px rgba(0,0,0,.55);outline:none;';
+      + 'resize:none;z-index:99999;box-shadow:0 8px 26px rgba(0,0,0,.6);outline:none;'
+      + 'box-sizing:border-box;';
     el.placeholder = '在这里打字，回车发送';
     el.addEventListener('keydown', function(e){
       if(e.key === 'Enter' && !e.shiftKey && !e.isComposing){

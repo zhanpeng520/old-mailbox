@@ -134,7 +134,7 @@ label act3_start:
             me "……算了。"
             me "当我没问。"
 
-            show awan hurt at awan_center
+            show awan cry_silent at awan_center
             with dissolve
 
             awan "你明明很在意。"
@@ -198,7 +198,7 @@ label act3_start:
     else:
         me "……对不起。"
 
-        show awan hurt at awan_center
+        show awan wave at awan_center
         with dissolve
 
         awan "你为什么要道歉？"

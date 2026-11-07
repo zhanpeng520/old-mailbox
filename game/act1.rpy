@@ -26,7 +26,7 @@ label act1_start:
 
     "我念了一遍，觉得这两个字有点烫。"
 
-    show awan calm at awan_center
+    show awan giggle at awan_center
     with dissolve
 
     awan "你呢？"
@@ -158,7 +158,7 @@ label side_beach_rain:
     scene bg sea_rain
     with dissolve
 
-    show awan shy at awan_center
+    show awan uneasy at awan_center
     with dissolve
 
     awan "……你不觉得奇怪吗？"
@@ -172,7 +172,7 @@ label side_beach_rain:
     me "（大概是光线的问题。）"
     me "你淋傻了。"
 
-    show awan lonely at awan_center
+    show awan think at awan_center
     with dissolve
 
     awan "嗯。大概是吧。"
@@ -247,7 +247,7 @@ label act1_invite:
     scene bg sea_sunset
     with dissolve
 
-    show awan calm at awan_center
+    show awan uneasy at awan_center
     with dissolve
 
     "她坐下来，把脚悬在堤岸外面。"
@@ -330,7 +330,7 @@ label act1_invite:
             "她说得很轻。"
             "轻得像我欠了她一个傍晚。"
 
-    show awan calm at awan_center
+    show awan farewell at awan_center
     with dissolve
 
     "天色彻底暗下来的时候，我该走了。"
@@ -341,7 +341,7 @@ label act1_invite:
 
     me "……你要不要一起？"
 
-    show awan shy at awan_center
+    show awan shock at awan_center
     with dissolve
 
     awan "一起？"
@@ -350,7 +350,7 @@ label act1_invite:
 
     "她愣了很久，久到我以为她会拒绝。"
 
-    show awan happy at awan_center
+    show awan giggle at awan_center
     with dissolve
 
     awan "我可以吗？"

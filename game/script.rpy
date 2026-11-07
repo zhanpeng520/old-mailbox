@@ -59,7 +59,7 @@ label start:
     "那天傍晚，海面像一块被压暗的玻璃。"
     "我照旧走到堤岸，却发现信箱旁边站着一个人。"
 
-    show awan calm at awan_center
+    show awan wind at awan_center
     with dissolve
 
     "她穿着一件洗得发白的裙子，赤着脚，站在潮湿的石阶上。"

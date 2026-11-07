@@ -1,0 +1,6 @@
+name = "old-mailbox-ai"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# 密钥不放这里，用命令行设置：
+#   wrangler secret put DEEPSEEK_KEY

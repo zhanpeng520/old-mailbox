@@ -140,6 +140,9 @@ image cg_typhoon_eye = cg_displayable("cg_typhoon_eye")
 image cg_lantern = cg_displayable("cg_lantern")
 image cg_river = cg_displayable("cg_river")
 image sunset_sea = cg_displayable("sunset_sea")
+# 真结局用：婚礼 / 一家四口
+image cg_wedding = cg_displayable("cg_wedding")
+image cg_family = cg_displayable("cg_family")
 
 # 舒瑶的六种状态：平静 / 害羞 / 欢喜 / 落寞 / 委屈 / 含泪透明
 init -1 python:
@@ -178,6 +181,23 @@ image awan sleepy = awan_sprite("sleepy", "#e6c8b8", "舒瑶 / 困倦")
 image awan firm = awan_sprite("firm", "#e8c0b2", "舒瑶 / 坚定")
 image awan wry = awan_sprite("wry", "#dcc0b8", "舒瑶 / 苦笑")
 image awan tease = awan_sprite("tease", "#f2c6b8", "舒瑶 / 促狭")
+
+# 第三批：带动作的 14 种（招手 / 掩嘴笑 / 不安 / 指点 / 无声落泪 / 含泪笑 /
+# 震惊 / 鼓脸 / 犯困 / 发抖 / 决意 / 道别 / 凑近 / 风里）
+image awan wave = awan_sprite("wave", "#f4c9ba", "舒瑶 / 招手")
+image awan giggle = awan_sprite("giggle", "#f6cfba", "舒瑶 / 掩嘴笑")
+image awan uneasy = awan_sprite("uneasy", "#dcc4bc", "舒瑶 / 不安")
+image awan point = awan_sprite("point", "#f3c8b6", "舒瑶 / 指点")
+image awan cry_silent = awan_sprite("cry_silent", "#c9a7a7", "舒瑶 / 无声落泪")
+image awan teary_smile = awan_sprite("teary_smile", "#e4b6b0", "舒瑶 / 含泪微笑")
+image awan shock = awan_sprite("shock", "#eec2b4", "舒瑶 / 震惊")
+image awan pout = awan_sprite("pout", "#f2c0b4", "舒瑶 / 鼓脸")
+image awan doze = awan_sprite("doze", "#e8c8bc", "舒瑶 / 犯困")
+image awan shiver = awan_sprite("shiver", "#cfc0c2", "舒瑶 / 发抖")
+image awan resolve = awan_sprite("resolve", "#ecc0ae", "舒瑶 / 决意")
+image awan farewell = awan_sprite("farewell", "#e0c2b8", "舒瑶 / 道别")
+image awan lean = awan_sprite("lean", "#f4c8b8", "舒瑶 / 凑近")
+image awan wind = awan_sprite("wind", "#dcc6bc", "舒瑶 / 风里")
 
 # ---------- 立绘位置 / 演出 ----------
 transform awan_center:

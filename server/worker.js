@@ -1,127 +1,92 @@
 /**
- * 旧信箱 · Cloudflare Worker 版 AI 中转（零成本方案，免费额度每天 10 万次）
+ * 旧信箱 · AI 中转 Worker（Cloudflare Workers）
  * ------------------------------------------------------------
- * 作用：
- *   1) 密钥只存在 Worker 的 secret 里，网页包里没有 key；
- *   2) 给浏览器补 CORS 应答（Ren'Py Web 版用 renpy.fetch，跨域必须允许）；
- *   3) 顺手做基础防滥用（条数、长度、max_tokens 封顶）。
+ * 作用：把 DeepSeek 的密钥留在服务端，网页端只知道这个 Worker 的地址。
+ * 部署：
+ *   1. npm i -g wrangler
+ *   2. wrangler login
+ *   3. cd server && wrangler secret put DEEPSEEK_KEY   （粘贴 sk-... 那个 key）
+ *   4. wrangler deploy
+ *   5. 把输出的 https://xxx.workers.dev 填到 game/ai_web_config.json 的 api_url
  *
- * 部署（3 分钟）：
- *   npm i -g wrangler
- *   wrangler login
- *   wrangler deploy server/worker.js --name old-mailbox-ai
- *   wrangler secret put DEEPSEEK_KEY      # 粘贴 sk-...
- * 可选：
- *   wrangler secret put CLIENT_TOKEN      # 与服务端用的弱口令一致
- *   wrangler secret put ALLOW_ORIGIN      # 默认 *，可填你的站点域名
- *
- * 部署完成后把 https://old-mailbox-ai.你的子域.workers.dev 填进 ai_web_config.json。
+ * 限流：同一 IP 每天最多 DAILY_LIMIT 次请求，超出返回 429。
+ * 前端收到 429 会显示“她今天有点累”，不会崩。
  */
 
-const MAX_MESSAGES = 40;
-const MAX_CHARS = 6000;
-const MAX_OUTPUT_TOKENS = 400;
+const UPSTREAM = "https://api.deepseek.com/v1/chat/completions";
+const DAILY_LIMIT = 300;      // 单 IP 每天条数
+const ALLOW_ORIGINS = [
+  "https://zhanpeng520.github.io",
+  "http://localhost:8787",
+  "http://127.0.0.1:8787",
+];
 
-function corsHeaders(env) {
+// 简单的内存计数（Worker 实例内有效；跨实例不严格，但足够防刷）
+const hits = new Map();
+
+function corsHeaders(origin) {
+  const allow = ALLOW_ORIGINS.includes(origin) ? origin : ALLOW_ORIGINS[0];
   return {
-    "Access-Control-Allow-Origin": env.ALLOW_ORIGIN || "*",
+    "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Player-Id, X-Client-Token, X-Tracking-Id",
+    "Access-Control-Allow-Headers": "content-type, authorization",
     "Access-Control-Max-Age": "86400",
-    "Cache-Control": "no-store",
+    "Vary": "Origin",
   };
 }
 
-function json(data, status, headers) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: Object.assign({ "Content-Type": "application/json; charset=utf-8" }, headers),
-  });
-}
-
-function cleanMessages(raw) {
-  const list = Array.isArray(raw) ? raw.slice(-MAX_MESSAGES) : [];
-  const out = [];
-  let total = 0;
-  for (const item of list) {
-    if (!item || typeof item !== "object") continue;
-    const role = item.role;
-    const content = item.content;
-    if (!["system", "user", "assistant"].includes(role) || typeof content !== "string") continue;
-    if (total + content.length > MAX_CHARS) break;
-    total += content.length;
-    out.push({ role, content });
-  }
-  return out;
+function today() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export default {
   async fetch(request, env) {
-    const cors = corsHeaders(env);
+    const origin = request.headers.get("Origin") || "";
+    const cors = corsHeaders(origin);
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: cors });
     }
-
-    const url = new URL(request.url);
-    if (url.pathname.endsWith("/health")) {
-      return json({ ok: true, model: env.UPSTREAM_MODEL || "deepseek-flash" }, 200, cors);
-    }
-
     if (request.method !== "POST") {
-      return json({ error: "method not allowed" }, 405, cors);
+      return new Response("method not allowed", { status: 405, headers: cors });
     }
 
-    if (env.CLIENT_TOKEN && request.headers.get("X-Client-Token") !== env.CLIENT_TOKEN) {
-      return json({ error: "bad client token" }, 403, cors);
+    // ---- 限流 ----
+    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    const key = ip + "|" + today();
+    const used = hits.get(key) || 0;
+    if (used >= DAILY_LIMIT) {
+      return new Response(
+        JSON.stringify({ error: { message: "daily limit reached" } }),
+        { status: 429, headers: { ...cors, "content-type": "application/json" } }
+      );
     }
+    hits.set(key, used + 1);
 
+    // ---- 转发 ----
     let body;
     try {
-      body = await request.json();
+      body = await request.text();
     } catch (e) {
-      return json({ error: "bad json" }, 400, cors);
+      return new Response("bad body", { status: 400, headers: cors });
     }
 
-    const messages = cleanMessages(body.messages);
-    if (!messages.length) return json({ error: "empty messages" }, 400, cors);
+    const upstream = await fetch(UPSTREAM, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + env.DEEPSEEK_KEY,
+      },
+      body,
+    });
 
-    const payload = {
-      model: env.UPSTREAM_MODEL || "deepseek-flash",
-      messages,
-      temperature: Math.min(1.2, Math.max(0, Number(body.temperature) || 0.9)),
-      top_p: Math.min(1, Math.max(0.05, Number(body.top_p) || 0.95)),
-      presence_penalty: Number(body.presence_penalty) || 0,
-      frequency_penalty: Number(body.frequency_penalty) || 0,
-      max_tokens: Math.min(MAX_OUTPUT_TOKENS, Number(body.max_tokens) || MAX_OUTPUT_TOKENS),
-      stream: false,
-    };
-
-    // 闲聊不思考，省一半以上输出 token
-    if (env.REASONING === "off" || env.REASONING === undefined) {
-      payload.thinking = { type: "disabled" };
-    }
-
-    let upstream;
-    try {
-      upstream = await fetch(env.UPSTREAM_URL || "https://api.deepseek.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + env.DEEPSEEK_KEY,
-        },
-        body: JSON.stringify(payload),
-      });
-    } catch (e) {
-      return json({ error: "upstream unreachable" }, 502, cors);
-    }
-
-    if (!upstream.ok) {
-      const detail = await upstream.text();
-      return json({ error: "upstream error", status: upstream.status, detail: detail.slice(0, 300) }, 502, cors);
-    }
-
-    const data = await upstream.json();
-    return json(data, 200, cors);
+    const text = await upstream.text();
+    return new Response(text, {
+      status: upstream.status,
+      headers: {
+        ...cors,
+        "content-type": upstream.headers.get("content-type") || "application/json",
+      },
+    });
   },
 };

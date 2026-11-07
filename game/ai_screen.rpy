@@ -51,6 +51,10 @@ screen ai_chat_screen(free_mode=False):
     modal True
     zorder 200
 
+    # 离开聊天界面时一定要把浏览器输入框收掉，否则它会残留在剧情画面上
+    on "hide" action Function(web_ime_hide)
+    on "replace" action Function(web_ime_hide)
+
     # screen 内先算好文案，避免在文本插值里调用函数
     $ mood_text = mood_label()
     $ subtitle = ("自由聊天 | 她看起来" + mood_text) if free_mode else ("她在这里，看起来" + mood_text + "。")
