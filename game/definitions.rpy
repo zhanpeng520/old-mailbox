@@ -146,6 +146,9 @@ image awan happy = awan_sprite("happy", "#f4c9a6", "舒瑶 / 欢喜")
 image awan lonely = awan_sprite("lonely", "#b9b3ba", "舒瑶 / 落寞")
 image awan hurt = awan_sprite("hurt", "#c9a7a7", "舒瑶 / 委屈")
 image awan fading = awan_sprite("fading", "#a9c2cf", "舒瑶 / 含泪透明", alpha=0.42)
+image awan surprised = awan_sprite("surprised", "#f0c8b8", "舒瑶 / 惊讶")
+image awan smile = awan_sprite("smile", "#ecc4b4", "舒瑶 / 温柔")
+image awan cry = awan_sprite("cry", "#c9a7a7", "舒瑶 / 哭")
 
 # ---------- 立绘位置 / 演出 ----------
 transform awan_center:

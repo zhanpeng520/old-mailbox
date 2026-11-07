@@ -82,6 +82,21 @@ init python:
     build.classify("game/ai_config.example.json", None)
     build.classify("game/ai_config.json", None)
 
+    # 根目录放着 GitHub Pages 的 Web 产物，绝不能被打进 game.zip，
+    # 否则每构建一次就把上一次的整包塞进去，体积翻倍。
+    for _web_file in [
+        "index.html", "index.html.symbols", "game.zip",
+        "renpy.js", "renpy-pre.js", "renpy.data", "renpy.wasm",
+        "manifest.json", "pwa_catalog.json", "service-worker.js",
+        "web-presplash.jpg",
+    ]:
+        build.classify(_web_file, None)
+
+    build.classify("icons/**", None)
+    build.classify("art_concept/**", None)
+    build.classify("server/**", None)
+    build.classify("game/cache/**", None)
+
     build.documentation("README.md")
 
     # Android / PC 通用构建

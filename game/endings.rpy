@@ -319,6 +319,8 @@ label ending_apart:
 
     "只是从那以后，我们再没有见过一面。"
 
+    $ play_ending_music()
+
     "—— 结局《隔海相望》 ——"
 
     "（二周目已解锁）"
@@ -459,6 +461,8 @@ label ending_true:
     "信箱还在。"
 
     "只是这一次，写信的人不用再等回信了。"
+
+    $ play_ending_music()
 
     "—— 隐藏结局《旧信箱的回音》 ——"
 

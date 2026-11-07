@@ -21,7 +21,8 @@ default chat_scene_vote_n = 0
 init -6 python:
 
     # ---------------- 表情 ----------------
-    MOOD_STATES = ["calm", "shy", "happy", "lonely", "hurt", "fading"]
+    MOOD_STATES = ["calm", "shy", "happy", "lonely", "hurt", "fading",
+                   "surprised", "smile", "cry"]
 
     MOOD_LABELS = {
         "calm": "平静",
@@ -30,6 +31,9 @@ init -6 python:
         "lonely": "落寞",
         "hurt": "委屈",
         "fading": "含泪将散",
+        "surprised": "愣住",
+        "smile": "温柔",
+        "cry": "哭",
     }
 
     # 玩家说的话里出现这些词，就往某个情绪上加分
@@ -40,6 +44,9 @@ init -6 python:
         ("shy", 3, ["喜欢你", "想你", "好看", "可爱", "漂亮", "抱", "牵", "等我"]),
         ("happy", 2, ["一起", "陪你", "带你去", "明天见", "下次", "我请"]),
         ("shy", 2, ["对不起", "抱歉", "我错了", "是我不好"]),
+        ("surprised", 3, ["其实我", "我要走", "我早知道", "秘密", "你猜", "我发现"]),
+        ("cry", 3, ["不回来", "最后一天", "永远见不到", "别忘了我"]),
+        ("smile", 2, ["等你", "记得", "一直在", "陪着你"]),
     ]
 
     # 她的回复里出现这些词，也影响表情
@@ -182,17 +189,40 @@ init -6 python:
         except Exception:
             return Transform(path, xysize=(config.screen_width, config.screen_height))
 
+    def _find_image(folder, name):
+        """按 webp / jpg / png 的顺序找图，压缩过也不影响加载。"""
+        for ext in (".webp", ".jpg", ".png"):
+            path = "%s/%s%s" % (folder, name, ext)
+            if renpy.loadable(path):
+                return path
+        return None
+
+    def find_audio(name):
+        """音频同理：放哪个格式都行，缺失就跳过，不报错。"""
+        for ext in (".ogg", ".opus", ".mp3", ".wav"):
+            path = "audio/%s%s" % (name, ext)
+            if renpy.loadable(path):
+                return path
+        return None
+
+    def play_ending_music():
+        """片尾曲：把文件放进 game/audio/ 命名为 ending_music 即可生效。"""
+        track = find_audio("ending_music")
+        if track:
+            renpy.music.play(track, fadein=4.0, if_changed=True)
+        return track
+
     def bg_displayable(name):
         """有正式图就用图，没有就退回纯色占位，不会白屏。"""
-        path = "images/bg/%s.png" % name
-        if renpy.loadable(path):
+        path = _find_image("images/bg", name)
+        if path:
             return _cover_image(path)
         return Solid(BG_FALLBACK.get(name, "#22232a"))
 
     def cg_displayable(name):
-        """CG 放 images/cg/<name>.png，同样的铺满逻辑。"""
-        path = "images/cg/%s.png" % name
-        if renpy.loadable(path):
+        """CG 放 images/cg/，同样的铺满逻辑。"""
+        path = _find_image("images/cg", name)
+        if path:
             return _cover_image(path)
         return Solid("#111318")
 
@@ -221,11 +251,11 @@ init -1 python:
         按高度等比缩放：三张立绘尺寸略有出入也不会被拉变形，
         脚底线和头顶线自动对齐。
         """
-        path = "images/awan/awan_%s.png" % state
-        if not renpy.loadable(path):
+        path = _find_image("images/awan", "awan_" + state)
+        if not path:
             # 没有单独表情图就复用平静态：宁可同一张脸，也不要换脸跳戏
-            path = "images/awan/awan_calm.png"
-        if renpy.loadable(path):
+            path = _find_image("images/awan", "awan_calm")
+        if path:
             try:
                 iw, ih = renpy.image_size(path)
                 zoom = SPRITE_H / float(ih)
