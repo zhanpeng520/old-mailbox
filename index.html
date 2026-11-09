@@ -167,6 +167,41 @@
       }
     }
 
+    /* 诊断浮层：黑屏时能点开看原因 */
+    #diagBtn {
+      display: none;
+      position: fixed;
+      right: 10px;
+      bottom: 56px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(230, 185, 138, 0.6);
+      background: rgba(9, 13, 19, 0.9);
+      color: #f2d6b0;
+      font-size: 12px;
+      z-index: 100000;
+    }
+
+    #diag {
+      display: none;
+      position: fixed;
+      left: 8px;
+      right: 8px;
+      bottom: 96px;
+      max-height: 46vh;
+      overflow: auto;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(230, 185, 138, 0.45);
+      background: rgba(6, 9, 14, 0.96);
+      color: #e8d7bf;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+      z-index: 100001;
+    }
+
     #inputPrompt {
       color: #eee;
       font-size: 150%;
@@ -303,6 +338,36 @@
           }
       }
 
+      // 兜底：部分手机浏览器 / 内置 webview 没有 Web Audio，
+      // 引擎初始化会直接抛错退出，表现为「进度条满了却一直黑屏」。
+      // 这里补一个空壳，让引擎能起来（代价是没有声音）。
+      (function () {
+          if (window.AudioContext || window.webkitAudioContext) return;
+          function noop() { }
+          function Node() {
+              this.gain = { value: 1, setValueAtTime: noop, linearRampToValueAtTime: noop, cancelScheduledValues: noop };
+              this.frequency = { value: 440, setValueAtTime: noop };
+              this.playbackRate = { value: 1 };
+              this.buffer = null;
+              this.onended = null;
+          }
+          ["connect", "disconnect", "start", "stop", "suspend", "resume", "close",
+              "createGain", "createBufferSource", "createOscillator", "createAnalyser",
+              "createDynamicsCompressor", "createBuffer", "decodeAudioData", "destroy"
+          ].forEach(function (k) {
+              Node.prototype[k] = function () { return new Node(); };
+          });
+          function Stub() {
+              this.destination = new Node();
+              this.currentTime = 0;
+              this.sampleRate = 44100;
+              this.state = "suspended";
+              this.listener = new Node();
+          }
+          Stub.prototype = Object.create(Node.prototype);
+          window.AudioContext = window.webkitAudioContext = Stub;
+      })();
+
       // The URL to game.zip, relative to the URL of this file.
       window.gameZipURL = 'game.zip';
 
@@ -379,7 +444,85 @@
               }
           }, 1000);
       })();
+
+      // 先装错误收集（不等 DOM），再挂面板
+      (function () {
+          window.__omlErrs = window.__omlErrs || [];
+          function push(m) {
+              if (!m) return;
+              var a = window.__omlErrs;
+              a.push(String(m).slice(0, 300));
+              if (a.length > 12) a.shift();
+          }
+          window.__omlAddErr = push;
+          window.addEventListener('error', function (e) {
+              push((e && e.message) || e);
+          });
+          window.addEventListener('unhandledrejection', function (e) {
+              push(e && e.reason);
+          });
+          var _ce = console.error.bind(console);
+          console.error = function () {
+              try {
+                  push(Array.prototype.join.call(arguments, ' '));
+              } catch (e) { }
+              _ce.apply(null, arguments);
+          };
+      })();
+
+      function omlInitDiag() {
+          var errs = window.__omlErrs;
+          var diag = document.getElementById('diag');
+          var btn = document.getElementById('diagBtn');
+          if (!diag || !btn) return;
+
+          function webgl2() {
+              try {
+                  return !!document.createElement('canvas').getContext('webgl2');
+              } catch (e) {
+                  return false;
+              }
+          }
+
+          function text() {
+              var bar = document.getElementById('statusProgress');
+              var st = document.getElementById('statusTextDiv');
+              return '状态：' + (st ? st.textContent : '-') +
+                  ' | 进度：' + (bar ? bar.value : '-') +
+                  '\nWebGL2：' + (webgl2() ? '支持' : '不支持') +
+                  '\nAudioContext：' + ((window.AudioContext || window.webkitAudioContext) ? '有' : '没有') +
+                  '\nUA：' + navigator.userAgent +
+                  '\n报错（' + errs.length + '）：' + (errs.length ? '\n- ' + errs.join('\n- ') : ' 无');
+          }
+
+          btn.addEventListener('click', function () {
+              if (diag.style.display === 'block') {
+                  diag.style.display = 'none';
+                  return;
+              }
+              diag.textContent = text();
+              diag.style.display = 'block';
+          });
+
+          setTimeout(function () { btn.style.display = 'block'; }, 18000);
+
+          setInterval(function () {
+              if (errs.length && diag.style.display !== 'block') {
+                  diag.textContent = text();
+                  diag.style.display = 'block';
+              }
+          }, 2000);
+      }
+
+      if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', omlInitDiag);
+      } else {
+          omlInitDiag();
+      }
   </script>
+  <button id="diagBtn">诊断</button>
+  <div id="diag"></div>
+
   <script src="renpy-pre.js"></script>
   <script async type="text/javascript" src="renpy.js"></script>
 </body>
