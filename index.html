@@ -313,12 +313,29 @@
           }
       }
 
-      // 加载看门狗：进度 20 秒没动就提示，避免手机上一直静静卡着
+      // 加载看门狗：
+      //   1) 进度 25 秒没动 → 网络断了
+      //   2) 进度已经到 100% 但 40 秒还没进游戏 → 引擎起不来（内存不足/浏览器不支持/在微信里打开）
       (function () {
+          var errs = [];
+          window.addEventListener('error', function (e) {
+              errs.push(String((e && e.message) || e));
+          });
+
           var lastValue = -1;
           var lastChange = Date.now();
+          var fullSince = 0;
           var hint = document.getElementById('loadHint');
           var statusDiv = document.getElementById('statusDiv');
+
+          function webgl2() {
+              try {
+                  var c = document.createElement('canvas');
+                  return !!(c.getContext && c.getContext('webgl2'));
+              } catch (e) {
+                  return false;
+              }
+          }
 
           setInterval(function () {
               var loading = statusDiv && statusDiv.className.indexOf('hidden') === -1;
@@ -331,13 +348,32 @@
               }
 
               if (!loading) {
-                  lastChange = Date.now();
                   if (hint) hint.style.display = 'none';
                   return;
               }
 
-              if ((Date.now() - lastChange) / 1000 > 20 && hint && !hint.innerHTML) {
-                  hint.innerHTML = '网络似乎卡住了。首次进入要下载约 58MB（引擎 + 素材），建议先连 WiFi；' +
+              if (v >= 99.5) {
+                  if (!fullSince) fullSince = Date.now();
+              } else {
+                  fullSince = 0;
+              }
+
+              // 下载完了却进不去
+              if (fullSince && (Date.now() - fullSince) / 1000 > 40 && hint && !hint.innerHTML) {
+                  hint.innerHTML =
+                      '<b>素材已经下载完，但游戏引擎没启动起来。</b><br>' +
+                      '常见原因：① 在微信/QQ 里点的链接 → 请点右上角「在浏览器打开」；' +
+                      '② 手机内存不足 → 关掉其他 App 再刷新；' +
+                      '③ 系统太旧，不支持 WebGL2（本机检测：' + (webgl2() ? '支持' : '<b>不支持</b>') + '）。<br>' +
+                      '诊断信息：' + (navigator.userAgent || '').slice(0, 120) +
+                      (errs.length ? '<br>报错：' + errs.slice(0, 2).join(' / ').slice(0, 160) : '') +
+                      '<br><a onclick="location.reload()">点这里重新加载</a>';
+                  hint.style.display = 'block';
+                  return;
+              }
+
+              if ((Date.now() - lastChange) / 1000 > 25 && hint && !hint.innerHTML) {
+                  hint.innerHTML = '网络似乎卡住了。首次进入要下载约 50MB（引擎 + 素材），建议先连 WiFi；' +
                       '也可以 <a onclick="location.reload()">点这里重试</a>。';
                   hint.style.display = 'block';
               }
