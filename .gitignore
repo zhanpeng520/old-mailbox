@@ -14,11 +14,19 @@ game/ai_config.json
 game/ai_web_config.json
 
 # ---------- 构建产物 ----------
+*-dist/
 *-dists/
 old-mailbox-web/
 old-mailbox-web-dist/
 build/
 dist/
+.wrangler/
+*.apk
+
+# Ren'Py 构建 Android 时自动生成；keystore 是签名私钥，绝不入库
+android.json
+android-icon_*.png
+*.keystore
 
 # ---------- 系统 ----------
 .DS_Store

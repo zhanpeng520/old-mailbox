@@ -64,8 +64,10 @@ screen ai_chat_screen(free_mode=False):
     # 表情由 scene_mood.rpy 推断：她刚说的那句话决定她现在的样子
     $ portrait = sprite_name()
 
-    # Web 端：轮询浏览器原生输入框，接住中文输入法的内容
+    # Web 端：打开就唤起浏览器原生输入框，定时轮询接住内容
     if renpy.emscripten:
+        on "show" action Function(web_ime_open)
+        on "hide" action Function(web_ime_hide)
         timer 0.35 repeat True action Function(web_ime_sync)
 
     # 背景跟着当前所在地点走，看得见但不抢戏
@@ -121,14 +123,7 @@ screen ai_chat_screen(free_mode=False):
                         if ai_pending:
                             text "舒瑶正在想……" size 17 color "#9aa5ae"
 
-            # 输入行
-            if renpy.emscripten:
-                textbutton "⌨ 用中文输入法（回车发送）":
-                    action Function(web_ime_open)
-                    text_size 16
-                    text_color "#9fb3c4"
-                    text_hover_color "#e6b98a"
-
+            # 输入行（Web 端真正的输入框是盖在下面这个 frame 上的原生 textarea）
             hbox:
                 spacing 10
 
@@ -137,10 +132,15 @@ screen ai_chat_screen(free_mode=False):
                     ysize 54
                     padding (16, 14)
                     background Frame("ui/panel_soft.png", Borders(24, 24, 24, 24), tile=False)
-                    input value VariableInputValue("ai_input") length 200 style "ai_input"
+                    if renpy.emscripten:
+                        # Web 端画面上这个 input 控件吃不了中文输入法，
+                        # 真正的输入框是盖在它上面的浏览器原生 textarea（见 web_ime.rpy）
+                        text "点输入框打字（支持中文输入法），回车发送" size 17 color "#8b949e"
+                    else:
+                        input value VariableInputValue("ai_input") length 200 style "ai_input"
 
                 textbutton "发送":
-                    action Function(ai_send)
+                    action Function(ai_send_web if renpy.emscripten else ai_send)
                     sensitive (not ai_pending)
                     text_size 20
                     text_color "#e6b98a"

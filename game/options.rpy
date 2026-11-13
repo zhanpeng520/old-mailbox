@@ -97,6 +97,16 @@ init python:
     build.classify("server/**", None)
     build.classify("game/cache/**", None)
 
+    # 本地产物目录同样不能进包：web-dist 里是上一版 game.zip，android-dist 里是 APK，
+    # 打进去会让包体从 20MB 涨到 120MB（甚至把旧包套娃）
+    build.classify("web-dist/**", None)
+    build.classify("android-dist/**", None)
+    # 签名文件、日志、临时文件一律不进包（对外可下载）
+    build.classify("*.keystore", None)
+    build.classify("*.log", None)
+    build.classify("errors.txt", None)
+    build.classify(".wrangler/**", None)
+
     build.documentation("README.md")
 
     # Android / PC 通用构建
