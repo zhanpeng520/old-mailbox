@@ -40,3 +40,6 @@ art_concept/_awan_all.jpg
 
 # 浏览器自动化调试产物
 .playwright-cli/
+
+# 例外：要分发给玩家的正式安卓安装包
+!downloads/*.apk
