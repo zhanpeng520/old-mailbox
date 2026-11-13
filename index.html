@@ -5,7 +5,116 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>旧信箱里的拾信者</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <script>
+  /* 手机 Safari / WebKit 音频兼容补丁：必须在引擎脚本之前执行。
+     Ren'Py 的 SDL2 音频后端启动时会调用一组 WebAudio 方法；
+     任何一个缺失，引擎都会抛错退出，表现为「进度条满了却一直黑屏」。 */
+  (function () {
+      function noop() { }
+      function param(v) {
+          return { value: v, setValueAtTime: noop, linearRampToValueAtTime: noop,
+              exponentialRampToValueAtTime: noop, setTargetAtTime: noop,
+              cancelScheduledValues: noop, setValueCurveAtTime: noop };
+      }
+      function Node() {
+          var s = this;
+          ["gain", "frequency", "detune", "Q", "pan", "delayTime", "playbackRate",
+              "threshold", "knee", "ratio", "attack", "release"
+          ].forEach(function (k) { s[k] = param(1); });
+          this.buffer = null;
+          this.onended = null;
+          this.onaudioprocess = null;
+          this.bufferSize = 2048;
+      }
+      Node.prototype.getChannelData = function () { return new Float32Array(2048); };
+      ["connect", "disconnect", "start", "stop", "suspend", "resume", "close",
+          "createGain", "createBufferSource", "createOscillator", "createAnalyser",
+          "createBiquadFilter", "createWaveShaper", "createDelay", "createConvolver",
+          "createDynamicsCompressor", "createChannelMerger", "createChannelSplitter",
+          "createMediaElementSource", "createMediaStreamSource",
+          "createMediaStreamDestination", "createPeriodicWave",
+          "createStereoPanner", "createPanner", "createScriptProcessor",
+          "createJavaScriptNode"
+      ].forEach(function (k) { Node.prototype[k] = function () { return new Node(); }; });
+      Node.prototype.createBuffer = function (ch, len) {
+          return { numberOfChannels: ch || 1, length: len || 2048,
+              sampleRate: 44100, duration: (len || 2048) / 44100,
+              getChannelData: function () { return new Float32Array(len || 2048); } };
+      };
+      Node.prototype.decodeAudioData = function (a, ok) {
+          var buf = this.createBuffer(2, 2048);
+          if (ok) { Promise.resolve().then(function () { ok(buf); }); }
+          return Promise.resolve(buf);
+      };
+      ["resume", "suspend", "close"].forEach(function (k) {
+          Node.prototype[k] = function () {
+              this.state = (k === "resume") ? "running" : "suspended";
+              return Promise.resolve();
+          };
+      });
+
+      function Stub() {
+          this.destination = new Node();
+          this.currentTime = 0;
+          this.sampleRate = 44100;
+          this.state = "suspended";
+          this.listener = new Node();
+      }
+      Stub.prototype = Object.create(Node.prototype);
+
+      function patch(C) {
+          if (!C || !C.prototype) return;
+          ["createScriptProcessor", "createJavaScriptNode", "createGain",
+              "createStereoPanner", "createPanner", "createBufferSource",
+              "createOscillator", "createAnalyser", "createBiquadFilter",
+              "createWaveShaper", "createDelay", "createConvolver",
+              "createDynamicsCompressor", "createChannelMerger", "createChannelSplitter",
+              "createMediaElementSource", "createMediaStreamSource",
+              "createMediaStreamDestination", "createPeriodicWave"
+          ].forEach(function (k) {
+              if (typeof C.prototype[k] !== "function") {
+                  C.prototype[k] = function () { return new Node(); };
+              }
+          });
+          if (typeof C.prototype.createBuffer !== "function") {
+              C.prototype.createBuffer = function (ch, len) {
+                  return { numberOfChannels: ch || 1, length: len || 2048,
+                      sampleRate: 44100, duration: (len || 2048) / 44100,
+                      getChannelData: function () { return new Float32Array(len || 2048); } };
+              };
+          }
+          if (typeof C.prototype.decodeAudioData !== "function") {
+              C.prototype.decodeAudioData = function (a, ok) {
+                  var buf = this.createBuffer(2, 2048);
+                  if (ok) { Promise.resolve().then(function () { ok(buf); }); }
+                  return Promise.resolve(buf);
+              };
+          }
+          ["resume", "suspend", "close"].forEach(function (k) {
+              if (typeof C.prototype[k] !== "function") {
+                  C.prototype[k] = function () { return Promise.resolve(); };
+              }
+          });
+      }
+
+      var AC = window.AudioContext, WK = window.webkitAudioContext;
+      patch(AC);
+      patch(WK);
+
+      var Base = AC || WK;
+      if (!Base) {
+          window.AudioContext = window.webkitAudioContext = Stub;
+          return;
+      }
+      // 构造失败（部分 iOS 会在没有用户手势时抛错）时退回空壳，保证引擎能起来
+      var Wrap = function () {
+          try { return new Base(); } catch (e) { return new Stub(); }
+      };
+      Wrap.prototype = Base.prototype;
+      window.AudioContext = window.webkitAudioContext = Wrap;
+  })();
+  </script>
   <link rel="manifest" href="manifest.json" crossorigin="use-credentials" />
   <link rel="icon" href="icons/icon-72x72.png" sizes="72x72" type="image/png" />
   <link rel="icon" href="icons/icon-96x96.png" sizes="96x96" type="image/png" />
@@ -338,35 +447,7 @@
           }
       }
 
-      // 兜底：部分手机浏览器 / 内置 webview 没有 Web Audio，
-      // 引擎初始化会直接抛错退出，表现为「进度条满了却一直黑屏」。
-      // 这里补一个空壳，让引擎能起来（代价是没有声音）。
-      (function () {
-          if (window.AudioContext || window.webkitAudioContext) return;
-          function noop() { }
-          function Node() {
-              this.gain = { value: 1, setValueAtTime: noop, linearRampToValueAtTime: noop, cancelScheduledValues: noop };
-              this.frequency = { value: 440, setValueAtTime: noop };
-              this.playbackRate = { value: 1 };
-              this.buffer = null;
-              this.onended = null;
-          }
-          ["connect", "disconnect", "start", "stop", "suspend", "resume", "close",
-              "createGain", "createBufferSource", "createOscillator", "createAnalyser",
-              "createDynamicsCompressor", "createBuffer", "decodeAudioData", "destroy"
-          ].forEach(function (k) {
-              Node.prototype[k] = function () { return new Node(); };
-          });
-          function Stub() {
-              this.destination = new Node();
-              this.currentTime = 0;
-              this.sampleRate = 44100;
-              this.state = "suspended";
-              this.listener = new Node();
-          }
-          Stub.prototype = Object.create(Node.prototype);
-          window.AudioContext = window.webkitAudioContext = Stub;
-      })();
+      // WebAudio 兼容补丁已放在 <head>，必须早于引擎脚本执行。
 
       // The URL to game.zip, relative to the URL of this file.
       window.gameZipURL = 'game.zip';
@@ -505,6 +586,13 @@
           });
 
           setTimeout(function () { btn.style.display = 'block'; }, 18000);
+          // 没报错、也玩得好好的，90 秒后把按钮收起来，别挡画面
+          setTimeout(function () {
+              if (!errs.length) {
+                  btn.style.display = 'none';
+                  diag.style.display = 'none';
+              }
+          }, 90000);
 
           setInterval(function () {
               if (errs.length && diag.style.display !== 'block') {
