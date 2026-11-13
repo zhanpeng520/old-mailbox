@@ -469,10 +469,20 @@
           });
 
           var lastValue = -1;
+          var lastStatus = '';
           var lastChange = Date.now();
           var fullSince = 0;
           var hint = document.getElementById('loadHint');
           var statusDiv = document.getElementById('statusDiv');
+          var statusText = document.getElementById('statusTextDiv');
+
+          function supportsWebGL2() {
+              try {
+                  return !!document.createElement('canvas').getContext('webgl2');
+              } catch (e) {
+                  return false;
+              }
+          }
 
           function webgl2() {
               try {
@@ -488,9 +498,18 @@
               var bar = document.getElementById('statusProgress');
               var v = bar ? parseFloat(bar.value || 0) : 0;
 
-              if (v !== lastValue) {
+              // 下载是分阶段的（引擎 → 素材 → 解包 → 脚本），
+              // 阶段一变就把计时清零，避免把「引擎下完」误判成「全部下完」。
+              var st = (statusText && statusText.textContent) || '';
+              if (v !== lastValue || st !== lastStatus) {
                   lastValue = v;
+                  lastStatus = st;
                   lastChange = Date.now();
+                  fullSince = 0;
+                  if (hint && hint.dataset.done !== '1') {
+                      hint.innerHTML = '';
+                      hint.style.display = 'none';
+                  }
               }
 
               if (!loading) {
@@ -506,13 +525,14 @@
 
               // 下载完了却进不去
               if (fullSince && (Date.now() - fullSince) / 1000 > 40 && hint && !hint.innerHTML) {
+                  var e2 = window.__omlErrs || [];
                   hint.innerHTML =
                       '<b>素材已经下载完，但游戏引擎没启动起来。</b><br>' +
                       '常见原因：① 在微信/QQ 里点的链接 → 请点右上角「在浏览器打开」；' +
                       '② 手机内存不足 → 关掉其他 App 再刷新；' +
-                      '③ 系统太旧，不支持 WebGL2（本机检测：' + (webgl2() ? '支持' : '<b>不支持</b>') + '）。<br>' +
+                      '③ 系统太旧，不支持 WebGL2（本机检测：' + (supportsWebGL2() ? '支持' : '<b>不支持</b>') + '）。<br>' +
                       '诊断信息：' + (navigator.userAgent || '').slice(0, 120) +
-                      (errs.length ? '<br>报错：' + errs.slice(0, 2).join(' / ').slice(0, 160) : '') +
+                      (e2.length ? '<br>报错：' + e2.slice(0, 2).join(' / ').slice(0, 160) : '') +
                       '<br><a onclick="location.reload()">点这里重新加载</a>';
                   hint.style.display = 'block';
                   return;
