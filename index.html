@@ -447,16 +447,48 @@
           }
       }
 
+      // 清掉本站的 Service Worker 和缓存后重载：换版本后如果还是旧界面，点它就好。
+      function omlHardRefresh() {
+          var jobs = [];
+          try {
+              if (window.caches && caches.keys) {
+                  jobs.push(caches.keys().then(function (ks) {
+                      return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+                  }));
+              }
+              if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+                  jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+                      return Promise.all(rs.map(function (r) { return r.unregister(); }));
+                  }));
+              }
+          } catch (e) { }
+          Promise.all(jobs).catch(function () { }).then(function () {
+              location.reload(true);
+          });
+      }
+
       // WebAudio 兼容补丁已放在 <head>，必须早于引擎脚本执行。
 
-      // The URL to game.zip, relative to the URL of this file.
-      window.gameZipURL = 'game.zip';
-
-      // Register the service worker.
-      if (navigator.serviceWorker) {
-          if (!navigator.serviceWorker.controller) {
-              navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'all' });
+      // game.zip 必须带版本号：一旦被浏览器/Service Worker 缓存成旧包，
+      // 玩家会一直停在上一版界面（例如聊天框打不了字）。
+      // 版本号直接读 pwa_catalog.json，每次重新打包就自动换 URL。
+      var OML_BUILD = '1794276825';
+      try {
+          var _catalogReq = new XMLHttpRequest();
+          _catalogReq.open('GET', 'pwa_catalog.json?ts=' + Date.now(), false);
+          _catalogReq.send(null);
+          if (_catalogReq.status === 200) {
+              OML_BUILD = String(JSON.parse(_catalogReq.responseText).version || OML_BUILD);
           }
+      } catch (e) { }
+      window.omlBuild = OML_BUILD;
+      window.gameZipURL = 'game.zip?v=' + OML_BUILD;
+
+      // 每次都 register：它是幂等的，但会触发 SW 更新检查。
+      // updateViaCache:'none' 让 SW 脚本自身不走 HTTP 缓存，发版后能立刻接管。
+      if (navigator.serviceWorker) {
+          navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' })
+              .catch(function () { });
       }
 
       // 加载看门狗：
@@ -533,14 +565,14 @@
                       '③ 系统太旧，不支持 WebGL2（本机检测：' + (supportsWebGL2() ? '支持' : '<b>不支持</b>') + '）。<br>' +
                       '诊断信息：' + (navigator.userAgent || '').slice(0, 120) +
                       (e2.length ? '<br>报错：' + e2.slice(0, 2).join(' / ').slice(0, 160) : '') +
-                      '<br><a onclick="location.reload()">点这里重新加载</a>';
+                      '<br><a onclick="omlHardRefresh()">点这里重新加载</a>';
                   hint.style.display = 'block';
                   return;
               }
 
               if ((Date.now() - lastChange) / 1000 > 25 && hint && !hint.innerHTML) {
                   hint.innerHTML = '网络似乎卡住了。首次进入要下载约 50MB（引擎 + 素材），建议先连 WiFi；' +
-                      '也可以 <a onclick="location.reload()">点这里重试</a>。';
+                      '也可以 <a onclick="omlHardRefresh()">点这里重试</a>。';
                   hint.style.display = 'block';
               }
           }, 1000);
@@ -596,12 +628,23 @@
                   '\n报错（' + errs.length + '）：' + (errs.length ? '\n- ' + errs.join('\n- ') : ' 无');
           }
 
+          function render() {
+              diag.textContent = text() + '\n版本：' + (window.omlBuild || '-');
+              var a = document.createElement('a');
+              a.textContent = '清缓存并重新加载';
+              a.href = 'javascript:void(0)';
+              a.style.cssText = 'display:inline-block;margin-top:10px;color:#e6b98a;text-decoration:underline;cursor:pointer;';
+              a.onclick = omlHardRefresh;
+              diag.appendChild(document.createElement('br'));
+              diag.appendChild(a);
+          }
+
           btn.addEventListener('click', function () {
               if (diag.style.display === 'block') {
                   diag.style.display = 'none';
                   return;
               }
-              diag.textContent = text();
+              render();
               diag.style.display = 'block';
           });
 
@@ -616,7 +659,7 @@
 
           setInterval(function () {
               if (errs.length && diag.style.display !== 'block') {
-                  diag.textContent = text();
+                  render();
                   diag.style.display = 'block';
               }
           }, 2000);

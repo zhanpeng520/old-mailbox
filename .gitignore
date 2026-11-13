@@ -37,3 +37,6 @@ desktop.ini
 art_concept/raw_*/
 art_concept/_*_sheet.jpg
 art_concept/_awan_all.jpg
+
+# 浏览器自动化调试产物
+.playwright-cli/

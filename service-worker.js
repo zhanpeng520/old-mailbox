@@ -7,7 +7,17 @@ self.addEventListener('install', function (e) {
 });
 
 self.addEventListener('activate', function (e) {
-    return self.clients.claim();
+    e.waitUntil((async function () {
+        // 换版本后丢掉缓存里旧的 game.zip，别让它盖住新包
+        try {
+            const cache = await caches.open(cacheName);
+            const keys = await cache.keys();
+            await Promise.all(keys.filter(function (r) {
+                return r.url.indexOf('game.zip') !== -1;
+            }).map(function (r) { return cache.delete(r); }));
+        } catch (err) { }
+        return self.clients.claim();
+    })());
 });
 
 
@@ -40,16 +50,25 @@ async function fetchAndCache(request) {
             return rv;
         }
 
-        if (cachedResponse) {
-            if (cachedResponse.headers.get('Last-Modified')) {
-                request.headers.set('If-Modified-Since', cachedResponse.headers.get('Last-Modified'));
-            }
-            if (cachedResponse.headers.get('ETag')) {
-                request.headers.set('If-None-Match', cachedResponse.headers.get('ETag'));
-            }
+        // 带版本号的 game.zip 一律走网络：URL 变了就说明是新包，
+        // 不能让旧缓存条目顶上来。
+        if (request.url.indexOf('game.zip?v=') !== -1) {
+            return await fetch(request);
         }
 
-        const response = await fetch(request);
+        // fetch 事件的 request.headers 不可写，直接 set 会抛 TypeError，
+        // 一抛错就落到 catch 里返回旧缓存。用新 Request 包一层才安全。
+        let fetchRequest = request;
+        if (cachedResponse) {
+            const h = new Headers(request.headers);
+            const lm = cachedResponse.headers.get('Last-Modified');
+            const et = cachedResponse.headers.get('ETag');
+            if (lm) h.set('If-Modified-Since', lm);
+            if (et) h.set('If-None-Match', et);
+            fetchRequest = new Request(request, { headers: h });
+        }
+
+        const response = await fetch(fetchRequest);
 
         if (cachedResponse && response.status == 304) {
             return cachedResponse;
